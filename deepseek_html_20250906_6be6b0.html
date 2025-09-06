@@ -218,7 +218,7 @@
                 const height = parseFloat(heightInput.value) || 0;
                 const costPerThousand = parseFloat(costInput.value) || 0;
                 
-                // Calculate board feet: (length × width × height) / 144
+                // Calculate board feet: (length × width × height) / 12
                 const boardFeet = (length * width * height) / 12;
                 
                 // Calculate total cost: (boardFeet × costPerThousand) / 1000
