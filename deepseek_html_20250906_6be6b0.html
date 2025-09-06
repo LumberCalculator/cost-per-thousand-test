@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Cost Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #4a86e8;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 134, 232, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .result h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .cost {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2575fc;
+        }
+        
+        .board-size {
+            font-size: 18px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .instructions p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .cost {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Board Cost Calculator</h1>
+        <p class="description">Calculate the cost of lumber based on dimensions and price per thousand board feet</p>
+        
+        <div class="input-group">
+            <label for="length">Length (feet)</label>
+            <input type="number" id="length" placeholder="Enter length" min="0" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label for="width">Width (inches)</label>
+            <input type="number" id="width" placeholder="Enter width" min="0" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label for="height">Height (inches)</label>
+            <input type="number" id="height" placeholder="Enter height" min="0" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label for="cost">Cost per Thousand Board Feet ($)</label>
+            <input type="number" id="cost" placeholder="Enter cost" min="0" step="0.01">
+        </div>
+        
+        <button id="calculate">Calculate Cost</button>
+        
+        <div class="result">
+            <h3>Total Cost</h3>
+            <div id="totalCost" class="cost">$0.00</div>
+            <div id="boardFeet" class="board-size">0 board feet</div>
+        </div>
+        
+        <div class="instructions">
+            <h3>How It Works</h3>
+            <p>Board feet = (Length × Width × Height) / 144</p>
+            <p>Total Cost = (Board Feet × Cost per Thousand) / 1000</p>
+            <p>All measurements should be in feet and inches as indicated.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateBtn = document.getElementById('calculate');
+            const lengthInput = document.getElementById('length');
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            const costInput = document.getElementById('cost');
+            const totalCostElement = document.getElementById('totalCost');
+            const boardFeetElement = document.getElementById('boardFeet');
+            
+            calculateBtn.addEventListener('click', calculateCost);
+            
+            // Add event listeners to all input fields to calculate on Enter key
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('keyup', function(event) {
+                    if (event.key === 'Enter') {
+                        calculateCost();
+                    }
+                });
+            });
+            
+            function calculateCost() {
+                const length = parseFloat(lengthInput.value) || 0;
+                const width = parseFloat(widthInput.value) || 0;
+                const height = parseFloat(heightInput.value) || 0;
+                const costPerThousand = parseFloat(costInput.value) || 0;
+                
+                // Calculate board feet: (length × width × height) / 144
+                const boardFeet = (length * width * height) / 12;
+                
+                // Calculate total cost: (boardFeet × costPerThousand) / 1000
+                const totalCost = (boardFeet * costPerThousand) / 1000;
+                
+                // Update the UI with the results
+                boardFeetElement.textContent = `${boardFeet.toFixed(2)} board feet`;
+                totalCostElement.textContent = `$${totalCost.toFixed(2)}`;
+            }
+        });
+    </script>
+</body>
+</html>
